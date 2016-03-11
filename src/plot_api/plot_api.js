@@ -27,6 +27,7 @@ var ErrorBars = require('../components/errorbars');
 var Legend = require('../components/legend');
 var Shapes = require('../components/shapes');
 var Titles = require('../components/titles');
+var RangeSelector = require('../components/range_selector');
 var manageModeBar = require('../components/modebar/manage');
 var xmlnsNamespaces = require('../constants/xmlns_namespaces');
 
@@ -244,6 +245,11 @@ Plotly.plot = function(gd, data, layout, config) {
     }
 
     function drawAxes() {
+
+        // TODO is there a better place for this???
+        RangeSelector.draw(gd);
+
+
         // draw ticks, titles, and calculate axis scaling (._b, ._m)
         return Plotly.Axes.doTicks(gd, 'redraw');
     }
