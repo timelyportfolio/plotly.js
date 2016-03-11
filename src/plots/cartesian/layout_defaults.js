@@ -12,6 +12,8 @@
 var Lib = require('../../lib');
 var Plots = require('../plots');
 
+var rangeSelectorDefaults = require('../../components/range_selector/defaults');
+
 var constants = require('./constants');
 var layoutAttributes = require('./layout_attributes');
 var handleAxisDefaults = require('./axis_defaults');
@@ -129,6 +131,12 @@ module.exports = function supplyLayoutDefaults(layoutIn, layoutOut, fullData) {
 
         handleAxisDefaults(axLayoutIn, axLayoutOut, coerce, defaultOptions);
         handlePositionDefaults(axLayoutIn, axLayoutOut, coerce, positioningOptions);
+
+        if(axLetter === 'x') {
+            // TODO add check on axis type 'date'
+            rangeSelectorDefaults(axLayoutIn, axLayoutOut, layoutOut);
+        }
+
         layoutOut[axName] = axLayoutOut;
 
         // so we don't have to repeat autotype unnecessarily,
