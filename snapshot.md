@@ -9,15 +9,20 @@ The purpose of this markdown document is to document exploration of how to best 
 Where do we attach toImage on the graph div?
     Is it _toImage?
     Do we just require /snapshot and bind to `this`?
+    
+What is the expected use case of our new ability?
 
 How do we piggyback on the snapshot button in the toolbar?
 
 How do we ask for new size?
+
+Are there reference points from other libraries that we could mimic or learn from?
 
 
 ## Thoughts
 `Plotly.Snapshot.clone` already has thumbnail ability by specifying [options tileClass:"thumbnail"](https://github.com/plotly/plotly.js/blob/master/src/snapshot/cloneplot.js#L76).
 
 
-`Plotly.Snapshot.clone` could be used to resize by adding this to `options` when/if we use `Plotly.plot` with our cloned `div`.
+`Plotly.Snapshot.clone` could be used to resize by adding this to `options` when/if we use `Plotly.plot` with our cloned `div`.  We could also dynamically show a resulting view in a modal or something similar and adjust with `Plotly.relayout`.
 
+`Plotly.Snapshot.clone` by default sets `staticPlot:true` in `config`.
