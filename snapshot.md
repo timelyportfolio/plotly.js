@@ -25,16 +25,20 @@ Are there reference points from other libraries that we could mimic or learn fro
 `Plotly.Snapshot.clone` already has thumbnail ability by specifying [options tileClass:"thumbnail"](https://github.com/plotly/plotly.js/blob/master/src/snapshot/cloneplot.js#L76).
 
 
-`Plotly.Snapshot.clone` could be used to resize by adding this to `options` when/if we use `Plotly.plot` with our cloned `div`.  We could also dynamically show a resulting view in a modal or something similar and adjust with `Plotly.relayout`.
+- `Plotly.Snapshot.clone` could be used to resize by adding this to `options` when/if we use `Plotly.plot` with our cloned `div`.  We could also dynamically show a resulting view in a modal or something similar and adjust with `Plotly.relayout`.
 
-`Plotly.Snapshot.clone` by default sets `staticPlot:true` in `config`.
+- `Plotly.Snapshot.clone` by default sets `staticPlot:true` in `config`.
 
-A very basic way to attach this assuming there is a modebar would be to do something like this.
-
+- A very basic way to attach this assuming there is a modebar would be to do something like this.  See [codepen](http://codepen.io/timelyportfolio/pen/ZWvyYM).
 ```
-gd._toImage = function(){this._fullLayout._modeBar.buttons.filter(function(btn){return btn[0].name==="toImage"})[0][0].click(this)}
+gd._toImage = function(){
+  this._fullLayout._modeBar.buttons.filter(
+    function(btn){return btn[0].name==="toImage"
+  })[0][0].click(this)
+}
 ```
 
+- Quick code to experiment from R
 ```
 library(plotly)
 
