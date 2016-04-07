@@ -24,7 +24,7 @@ function toImage(gd, opts) {
     var Snapshot = Plotly.Snapshot;
     var ev = new EventEmitter();
 
-    var clone = Snapshot.clone(gd, {format: 'png'});
+    var clone = Snapshot.clone(gd, {format: 'png', height: opts.height, width: opts.width});
     var clonedGd = clone.td;
 
     // put the cloned div somewhere off screen before attaching to DOM
