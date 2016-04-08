@@ -64,12 +64,12 @@ modeBarButtons.toImage = {
         gd._snapshotInProgress = true;
         Lib.notifier('Taking snapshot - this may take a few seconds', 'long');
 
-        var ev = Snapshot.toImage(gd, {format: format});
+        var promise = Snapshot.toImage(gd, {format: format});
 
         var filename = gd.fn || 'newplot';
         filename += '.' + format;
 
-        ev.once('success', function(result) {
+        promise.then(function(result) {
             gd._snapshotInProgress = false;
 
             var downloadLink = document.createElement('a');
@@ -80,16 +80,12 @@ modeBarButtons.toImage = {
             downloadLink.click();
             document.body.removeChild(downloadLink);
 
-            ev.clean();
-        });
-
-        ev.once('error', function(err) {
+        })
+        .catch(function(err) {
             gd._snapshotInProgress = false;
 
             Lib.notifier('Sorry there was a problem downloading your ' + format, 'long');
             console.error(err);
-
-            ev.clean();
         });
     }
 };
