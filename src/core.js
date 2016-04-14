@@ -31,6 +31,7 @@ exports.moveTraces = Plotly.moveTraces;
 exports.purge = Plotly.purge;
 exports.setPlotConfig = require('./plot_api/set_plot_config');
 exports.register = Plotly.register;
+exports.toImage = Plotly.toImage;
 
 // plot icons
 exports.Icons = require('../build/ploticon');
