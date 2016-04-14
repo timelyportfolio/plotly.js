@@ -9,7 +9,7 @@
 
 'use strict';
 
-var Plotly = require('../plotly');
+var toImage = require('../plot_api/to_image');
 var Lib = require('../lib');
 
 /**
@@ -19,9 +19,6 @@ var Lib = require('../lib');
  */
 function downloadImage(gd, opts) {
     
-    var Snapshot = Plotly.Snapshot;
-    var Lib = Plotly.Lib;
-  
     // check for undefined opts
     opts = opts || {};
     
@@ -42,7 +39,7 @@ function downloadImage(gd, opts) {
     gd._snapshotInProgress = true;
     Lib.notifier('Taking snapshot - this may take a few seconds', 'long');
 
-    var promise = Snapshot.toImage(gd, opts);
+    var promise = toImage(gd, opts);
 
     var filename = gd.fn || 'newplot';
     filename += '.' + opts.format;
@@ -61,7 +58,7 @@ function downloadImage(gd, opts) {
     .catch(function(err) {
         gd._snapshotInProgress = false;
 
-        Lib.notifier('Sorry there was a problem downloading your ' + format, 'long');
+        Lib.notifier('Sorry there was a problem downloading your ' + opts.format, 'long');
         console.error(err);
     });
 };
