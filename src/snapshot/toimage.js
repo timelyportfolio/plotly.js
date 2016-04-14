@@ -10,6 +10,7 @@
 
 'use strict';
 
+var EventEmitter = require('events').EventEmitter;
 var Plotly = require('../plotly');
 
 /**
@@ -18,78 +19,64 @@ var Plotly = require('../plotly');
  * @param opts.format 'jpeg' | 'png' | 'webp' | 'svg'
  */
 function toImage(gd, opts) {
-    var promise = new Promise(function(resolve, reject) {
-        // check for undefined opts
-        opts = opts || {};
-        // default to png
-        opts.format = opts.format || 'png';
 
-        // first clone the GD so we can operate in a clean environment
-        var Snapshot = Plotly.Snapshot;
+    // first clone the GD so we can operate in a clean environment
+    var Snapshot = Plotly.Snapshot;
+    var ev = new EventEmitter();
 
-        var clone = Snapshot.clone(gd, {format: 'png', height: opts.height, width: opts.width});
-        var clonedGd = clone.td;
+    var clone = Snapshot.clone(gd, {format: 'png'});
+    var clonedGd = clone.td;
 
-        // put the cloned div somewhere off screen before attaching to DOM
-        clonedGd.style.position = 'absolute';
-        clonedGd.style.left = '-5000px';
-        document.body.appendChild(clonedGd);
+    // put the cloned div somewhere off screen before attaching to DOM
+    clonedGd.style.position = 'absolute';
+    clonedGd.style.left = '-5000px';
+    document.body.appendChild(clonedGd);
 
-        function wait() {
-            var delay = Snapshot.getDelay(clonedGd._fullLayout);
+    function wait() {
+        var delay = Snapshot.getDelay(clonedGd._fullLayout);
 
-            return new Promise(function(resolve, reject) {
-                setTimeout(function() {
-                    var svg = Plotly.Snapshot.toSVG(clonedGd);
+        setTimeout(function() {
+            var svg = Plotly.Snapshot.toSVG(clonedGd);
 
-                    var canvasContainer = window.document.createElement('div');
-                    var canvas = window.document.createElement('canvas');
+            var canvasContainer = window.document.createElement('div');
+            var canvas = window.document.createElement('canvas');
 
-                    // window.document.body.appendChild(canvasContainer);
-                    canvasContainer.appendChild(canvas);
+            // window.document.body.appendChild(canvasContainer);
+            canvasContainer.appendChild(canvas);
 
-                    canvasContainer.id = Plotly.Lib.randstr();
-                    canvas.id = Plotly.Lib.randstr();
+            canvasContainer.id = Plotly.Lib.randstr();
+            canvas.id = Plotly.Lib.randstr();
 
-                    Plotly.Snapshot.svgToImg({
-                        format: opts.format,
-                        width: clonedGd._fullLayout.width,
-                        height: clonedGd._fullLayout.height,
-                        canvas: canvas,
-                        svg: svg,
-                        // ask svgToImg to return a Promise
-                        //  rather than EventEmitter
-                        //  leave EventEmitter for backward
-                        //  compatibility
-                        promise: true
-                    }).then(function(url) {
-                        if(clonedGd) clonedGd.remove();
-                        resolve(url);
-                    }).catch(function(err) {
-                        reject(err);
-                    });
-                }, delay);
+            ev = Plotly.Snapshot.svgToImg({
+                format: opts.format,
+                width: clonedGd._fullLayout.width,
+                height: clonedGd._fullLayout.height,
+                canvas: canvas,
+                emitter: ev,
+                svg: svg
             });
-        }
 
-        var redrawFunc = Snapshot.getRedrawFunc(clonedGd);
+            ev.clean = function() {
+                if(clonedGd) clonedGd.remove();
+            };
 
-        Plotly.plot(clonedGd, clone.data, clone.layout, clone.config)
-            // TODO: the following is Plotly.Plots.redrawText but without the waiting.
-            // we shouldn't need to do this, but in *occasional* cases we do. Figure
-            // out why and take it out.
+        }, delay);
+    }
 
-            // not sure the above TODO makes sense anymore since
-            //   we have converted to promises
-            .then(redrawFunc)
-            .then(wait)
-            .then(function(url) { resolve(url); })
-            .catch(function(err) {
-                reject(err);
-            });
-    });
+    var redrawFunc = Snapshot.getRedrawFunc(clonedGd);
 
-    return promise;
+    Plotly.plot(clonedGd, clone.data, clone.layout, clone.config)
+        // TODO: the following is Plotly.Plots.redrawText but without the waiting.
+        // we shouldn't need to do this, but in *occasional* cases we do. Figure
+        // out why and take it out.
+        .then(redrawFunc)
+        .then(wait)
+        .catch(function(err) {
+            ev.emit('error', err);
+        });
+
+
+    return ev;
 }
 
 module.exports = toImage;
