@@ -6,10 +6,13 @@
 * LICENSE file in the root directory of this source tree.
 */
 
+var EventEmitter = require('events').EventEmitter;
 
 'use strict';
 
 function svgToImg(opts) {
+  
+    var ev = opts.emitter || new EventEmitter();
 
     var promise = new Promise(function(resolve, reject) {
 
@@ -50,20 +53,41 @@ function svgToImg(opts) {
                     break;
                 default:
                     reject(new Error('Image format is not jpeg, png or svg'));
+                    // eventually remove the ev
+                    //  in favor of promises
+                    if(!opts.promise){
+                      return ev.emit('error', 'Image format is not jpeg, png or svg');
+                    }
             }
-
             resolve(imgData);
+            // eventually remove the ev
+            //  in favor of promises
+            if(!opts.promise){
+              ev.emit('success', imgData);
+            }
         };
 
         img.onerror = function(err) {
             DOMURL.revokeObjectURL(url);
             reject(err);
+            // eventually remove the ev
+            //  in favor of promises
+            if(!opts.promise){
+              return ev.emit('error', err);
+            }
         };
 
         img.src = url;
     });
 
-    return promise;
+    // temporary for backward compatibility
+    //  move to only Promise in 2.0.0
+    //  and eliminate the EventEmitter
+    if(opts.promise) {
+      return promise;
+    }
+    
+    return ev;
 }
 
 module.exports = svgToImg;

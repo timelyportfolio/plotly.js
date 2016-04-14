@@ -20,9 +20,9 @@ var Plotly = require('../plotly');
 function toImage(gd, opts) {
     var promise = new Promise(function(resolve, reject) {
         // check for undefined opts
-        opts = (opts) ? opts : {};
+        opts = opts || {};
         // default to png
-        opts.format = (opts.format) ? opts.format : 'png';
+        opts.format = opts.format || 'png';
 
         // first clone the GD so we can operate in a clean environment
         var Snapshot = Plotly.Snapshot;
@@ -56,7 +56,12 @@ function toImage(gd, opts) {
                         width: clonedGd._fullLayout.width,
                         height: clonedGd._fullLayout.height,
                         canvas: canvas,
-                        svg: svg
+                        svg: svg,
+                        // ask svgToImg to return a Promise
+                        //  rather than EventEmitter
+                        //  leave EventEmitter for backward
+                        //  compatibility
+                        promise: true
                     }).then(function(url) {
                         if(clonedGd) clonedGd.remove();
                         resolve(url);
