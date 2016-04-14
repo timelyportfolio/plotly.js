@@ -35,7 +35,7 @@ var Snapshot = {
     toSVG: require('./tosvg'),
     svgToImg: require('./svgtoimg'),
     toImage: require('./toimage'),
-    toSnapshot: require('./tosnapshot')
+    downloadImage: require('./download')
 };
 
 module.exports = Snapshot;

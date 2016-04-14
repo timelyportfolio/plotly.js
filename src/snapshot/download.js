@@ -17,16 +17,16 @@ var Lib = require('../lib');
  * @param {object} opts option object
  * @param opts.format 'jpeg' | 'png' | 'webp' | 'svg'
  */
-function toSnapshot(gd, opts) {
+function downloadImage(gd, opts) {
     
     var Snapshot = Plotly.Snapshot;
     var Lib = Plotly.Lib;
   
     // check for undefined opts
-    opts = (opts) ? opts : {};
+    opts = opts || {};
     
     // default to png
-    opts.format = (opts.format) ? opts.format : 'png';
+    opts.format = opts.format || 'png';
     
     if(Lib.isIE()) {
         Lib.notifier('Snapshotting is unavailable in Internet Explorer. ' +
@@ -42,12 +42,12 @@ function toSnapshot(gd, opts) {
     gd._snapshotInProgress = true;
     Lib.notifier('Taking snapshot - this may take a few seconds', 'long');
 
-    var ev = Snapshot.toImage(gd, opts);
+    var promise = Snapshot.toImage(gd, opts);
 
     var filename = gd.fn || 'newplot';
     filename += '.' + opts.format;
 
-    ev.once('success', function(result) {
+    promise.then(function(result) {
         gd._snapshotInProgress = false;
 
         var downloadLink = document.createElement('a');
@@ -57,18 +57,13 @@ function toSnapshot(gd, opts) {
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
-
-        ev.clean();
-    });
-
-    ev.once('error', function(err) {
+    })
+    .catch(function(err) {
         gd._snapshotInProgress = false;
 
         Lib.notifier('Sorry there was a problem downloading your ' + format, 'long');
         console.error(err);
-
-        ev.clean();
     });
-}
+};
 
-module.exports = toSnapshot;
+module.exports = downloadImage;
