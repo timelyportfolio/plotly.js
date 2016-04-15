@@ -79,11 +79,6 @@ exports.register(require('./traces/scatter'));
 // plot api
 require('./plot_api/plot_api');
 exports.PlotSchema = require('./plot_api/plot_schema');
-// toImage to attach directly to Plotly
-//  to allow us to get rid of Snapshot below
-//  for version 2.0.0
-exports.toImage = require('./plot_api/to_image');
-
 
 // imaging routines
 exports.Snapshot = require('./snapshot');
