@@ -47,8 +47,8 @@ modeBarButtons.toImage = {
     name: 'toImage',
     title: 'Download plot as a png',
     icon: Icons.camera,
-    click: function(gd){
-      Snapshot.downloadImage(gd)
+    click: function(gd) {
+        Snapshot.downloadImage(gd);
     }
 };
 
