@@ -11,7 +11,7 @@
 
 var Plotly = require('../../plotly');
 var Lib = require('../../lib');
-var Snapshot = require('../../snapshot');
+var downloadImage = require('../../snapshot/download');
 var Icons = require('../../../build/ploticon');
 
 
@@ -48,7 +48,23 @@ modeBarButtons.toImage = {
     title: 'Download plot as a png',
     icon: Icons.camera,
     click: function(gd) {
-        Snapshot.downloadImage(gd);
+        if(Lib.isIE()) {
+            Lib.notifier('Snapshotting is unavailable in Internet Explorer. ' +
+                         'Consider exporting your images using the Plotly Cloud', 'long');
+            return;
+        }
+    
+        if(gd._snapshotInProgress) {
+            Lib.notifier('Snapshotting is still in progress - please hold', 'long');
+            return;
+        }
+    
+        gd._snapshotInProgress = true;
+        Lib.notifier('Taking snapshot - this may take a few seconds', 'long');
+
+        downloadImage(gd).catch(function(err){
+            Lib.notifier('Sorry there was a problem downloading your snapshot', 'long');
+        });
     }
 };
 

@@ -10,12 +10,14 @@
 'use strict';
 
 var toImage = require('../plot_api/to_image');
-var Lib = require('../lib');
 
 /**
  * @param {object} gd figure Object
  * @param {object} opts option object
  * @param opts.format 'jpeg' | 'png' | 'webp' | 'svg'
+ * @param opts.width width of snapshot in px
+ * @param opts.height height of snapshot in px
+ * @param opts.filename name of file excluding extension
  */
 function downloadImage(gd, opts) {
     
@@ -25,41 +27,30 @@ function downloadImage(gd, opts) {
     // default to png
     opts.format = opts.format || 'png';
     
-    if(Lib.isIE()) {
-        Lib.notifier('Snapshotting is unavailable in Internet Explorer. ' +
-                     'Consider exporting your images using the Plotly Cloud', 'long');
-        return;
-    }
-
-    if(gd._snapshotInProgress) {
-        Lib.notifier('Snapshotting is still in progress - please hold', 'long');
-        return;
-    }
-
     gd._snapshotInProgress = true;
-    Lib.notifier('Taking snapshot - this may take a few seconds', 'long');
-
     var promise = toImage(gd, opts);
 
-    var filename = gd.fn || 'newplot';
+    var filename = opts.filename || gd.fn || 'newplot';
     filename += '.' + opts.format;
 
-    promise.then(function(result) {
-        gd._snapshotInProgress = false;
-
-        var downloadLink = document.createElement('a');
-        downloadLink.href = result;
-        downloadLink.download = filename; // only supported by FF and Chrome
-
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-    })
-    .catch(function(err) {
-        gd._snapshotInProgress = false;
-
-        Lib.notifier('Sorry there was a problem downloading your ' + opts.format, 'long');
-        console.error(err);
+    return new Promise(function(resolve,reject){
+        promise.then(function(result) {
+            gd._snapshotInProgress = false;
+    
+            var downloadLink = document.createElement('a');
+            downloadLink.href = result;
+            downloadLink.download = filename; // only supported by FF and Chrome
+    
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            resolve();
+        })
+        .catch(function(err) {
+            gd._snapshotInProgress = false;
+            console.error(err);
+            reject(err);
+        });
     });
 };
 
