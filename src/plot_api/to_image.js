@@ -16,6 +16,8 @@ var Plotly = require('../plotly');
  * @param {object} gd figure Object
  * @param {object} opts option object
  * @param opts.format 'jpeg' | 'png' | 'webp' | 'svg'
+ * @param opts.width width of snapshot in px
+ * @param opts.height height of snapshot in px
  */
 function toImage(gd, opts) {
     var Snapshot = require('../snapshot');
