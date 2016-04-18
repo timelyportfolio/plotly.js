@@ -19,12 +19,10 @@ describe('Plotly.toImage', function() {
     afterEach(destroyGraphDiv);
     
     it('should be attached to Plotly', function() {
-      debugger;
         expect(Plotly.toImage).toBeDefined();
     });
     
     it('should return a promise', function(done) {
-      debugger;
         function isPromise(x){
             return !!x.then || typeof x.then === 'function';
         }
