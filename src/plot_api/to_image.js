@@ -21,17 +21,18 @@ var Plotly = require('../plotly');
  */
 function toImage(gd, opts) {
     var Snapshot = require('../snapshot');
-  
+
     var promise = new Promise(function(resolve, reject) {
         // check for undefined opts
         opts = opts || {};
         // default to png
         opts.format = opts.format || 'png';
-        
-        if( (opts.width && opts.width < 1) ||
+
+        if(
+            (opts.width && opts.width < 1) ||
             (opts.height && opts.height < 1)
-        ){
-          reject(new Error("Height and width should be pixel values."));
+        ) {
+            reject(new Error('Height and width should be pixel values.'));
         }
 
         // first clone the GD so we can operate in a clean environment
