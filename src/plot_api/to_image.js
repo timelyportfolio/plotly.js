@@ -12,6 +12,8 @@
 
 var Plotly = require('../plotly');
 
+var isNumeric = require('fast-isnumeric');
+
 /**
  * @param {object} gd figure Object
  * @param {object} opts option object
@@ -29,8 +31,8 @@ function toImage(gd, opts) {
         opts.format = opts.format || 'png';
 
         if(
-            (opts.width && opts.width < 1) ||
-            (opts.height && opts.height < 1)
+            (opts.width && isNumeric(opts.width) && opts.width < 1) ||
+            (opts.height && isNumeric(opts.height) && opts.height < 1)
         ) {
             reject(new Error('Height and width should be pixel values.'));
         }

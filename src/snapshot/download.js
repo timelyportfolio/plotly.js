@@ -29,8 +29,8 @@ function downloadImage(gd, opts) {
     
     return new Promise(function(resolve,reject){
         if(gd._snapshotInProgress){
-          reject('Snapshotting is unavailable in Internet Explorer. ' +
-                     'Consider exporting your images using the Plotly Cloud');
+            reject(new Error('Snapshotting is unavailable in Internet Explorer. ' +
+                     'Consider exporting your images using the Plotly Cloud'));
         }
         
         gd._snapshotInProgress = true;

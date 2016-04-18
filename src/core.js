@@ -32,6 +32,7 @@ exports.purge = Plotly.purge;
 exports.setPlotConfig = require('./plot_api/set_plot_config');
 exports.register = Plotly.register;
 exports.toImage = require('./plot_api/to_image');
+exports.downloadImage = require('./snapshot/download');
 
 // plot icons
 exports.Icons = require('../build/ploticon');

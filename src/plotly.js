@@ -82,4 +82,3 @@ exports.PlotSchema = require('./plot_api/plot_schema');
 
 // imaging routines
 exports.Snapshot = require('./snapshot');
-

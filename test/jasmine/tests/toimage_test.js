@@ -5,6 +5,7 @@ var Plotly = require('@lib/index');
 var createGraphDiv = require('../assets/create_graph_div');
 var destroyGraphDiv = require('../assets/destroy_graph_div');
 var subplotMock = require('../../image/mocks/multiple_subplots.json');
+var plot3dMock = require('../../image/mocks/gl3d_bunny.json');
 
 
 describe('Plotly.toImage', function() {
@@ -65,42 +66,42 @@ describe('Plotly.toImage', function() {
         subplotMock.layout.height = 600;
         subplotMock.layout.width = 700;
 
-        Plotly.plot(gd, subplotMock.data, subplotMock.layout)
-            .then(function(gd) {
-                Plotly.toImage(gd).then(function(url) {
-                    img.src = url;
-                    expect(img.height).toBe(600);
-                    expect(img.width).toBe(700);
-                    // now provide height and width in opts
-                    Plotly.toImage(gd, {height: 400, width: 400}).then(function(url) {
-                        img.src = url;
-                        expect(img.height).toBe(400);
-                        expect(img.width).toBe(400);
-                        done();
-                    });
-                });
-            });
+        Plotly.plot(gd, subplotMock.data, subplotMock.layout).then(function(gd) {
+            return Plotly.toImage(gd);
+        }).then(function(url) {
+            img.src = url;
+            expect(img.height).toBe(600);
+            expect(img.width).toBe(700);
+            // now provide height and width in opts
+            return Plotly.toImage(gd, {height: 400, width: 400});
+        }).then(function(url) {
+            img.src = url;
+            expect(img.height).toBe(400);
+            expect(img.width).toBe(400);
+            done();
+        });
     });
 
     it('should create proper file type', function(done) {
         var plot = Plotly.plot(gd, subplotMock.data, subplotMock.layout);
 
         plot.then(function(gd) {
-            Plotly.toImage(gd, {format: 'png'}).then(function(url) {
-                expect(url.substr(0,15)).toBe('data:image/png;');
-                // now do jpeg
-                Plotly.toImage(gd, {format: 'jpeg'}).then(function(url) {
-                    expect(url.substr(0,16)).toBe('data:image/jpeg;');
-                    // now do svg
-                    Plotly.toImage(gd, {format: 'webp'}).then(function(url) {
-                        expect(url.substr(0,16)).toBe('data:image/webp;');
-                        Plotly.toImage(gd, {format: 'svg'}).then(function(url) {
-                            expect(url.substr(1,3)).toBe('svg');
-                            done();
-                        });
-                    });
-                });
-            });
+            return Plotly.toImage(gd, {format: 'png'});
+        }).then(function(url) {
+            expect(url.substr(0,15)).toBe('data:image/png;');
+            // now do jpeg
+            return Plotly.toImage(gd, {format: 'jpeg'});
+        }).then(function(url) {
+            expect(url.substr(0,16)).toBe('data:image/jpeg;');
+            // now do webp
+            return Plotly.toImage(gd, {format: 'webp'});
+        }).then(function(url) {
+            expect(url.substr(0,16)).toBe('data:image/webp;');
+            // now do svg
+            return Plotly.toImage(gd, {format: 'svg'});
+        }).then(function(url) {
+            expect(url.substr(1,3)).toBe('svg');
+            done();
         });
     });
 });
