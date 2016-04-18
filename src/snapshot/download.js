@@ -27,13 +27,18 @@ function downloadImage(gd, opts) {
     // default to png
     opts.format = opts.format || 'png';
     
-    gd._snapshotInProgress = true;
-    var promise = toImage(gd, opts);
-
-    var filename = opts.filename || gd.fn || 'newplot';
-    filename += '.' + opts.format;
-
     return new Promise(function(resolve,reject){
+        if(gd._snapshotInProgress){
+          reject('Snapshotting is unavailable in Internet Explorer. ' +
+                     'Consider exporting your images using the Plotly Cloud');
+        }
+        
+        gd._snapshotInProgress = true;
+        var promise = toImage(gd, opts);
+    
+        var filename = opts.filename || gd.fn || 'newplot';
+        filename += '.' + opts.format;
+
         promise.then(function(result) {
             gd._snapshotInProgress = false;
     
