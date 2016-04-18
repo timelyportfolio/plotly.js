@@ -27,6 +27,12 @@ function toImage(gd, opts) {
         opts = opts || {};
         // default to png
         opts.format = opts.format || 'png';
+        
+        if( (opts.width && opts.width < 1) ||
+            (opts.height && opts.height < 1)
+        ){
+          reject(new Error("Height and width should be pixel values."));
+        }
 
         // first clone the GD so we can operate in a clean environment
         var clone = Snapshot.clone(gd, {format: 'png', height: opts.height, width: opts.width});
