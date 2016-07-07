@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <script src = "../dist/plotly.js"></script>
+</head>
+
+<body>
+  <script>
+    var x = {
+      "data": [{
+        "x": [1, 2, 3],
+        "y": [4, 5, 6],
+        "identifiers": ["China", "Pakistan", "Australia"],
+        "lines": {
+          "color": "red"
+        }
+      }, {
+        "x": [1, 2, 3],
+        "y": [3, 8, 9],
+        "markers": {
+          "color": "red"
+        }
+      }],
+      "layout": {
+        "slider": {
+          "visible": true,
+          "plotly_method": "animate",
+          "args": ["$value", {"duration": 500}]
+        },
+        "slider2": {
+          "visible": true,
+          "plotly_method": "animate",
+          "args": ["$value", {"duration": 500}]
+        }
+      },
+      "frames": [
+        {
+          "name": "base",
+          "y": [4, 5, 7],
+          "identifiers": ["China", "Pakistan", "Australia"],
+        }, {
+          "name": "1960",
+          "data": [{
+            "y": [1, 2, 3],
+            "identifiers": ["China", "Pakistan", "Australia"],
+          }],
+          "layout": {
+            "xaxis": {"range": [7, 3]},
+            "yaxis": {"range": [0, 5]}
+          },
+          "baseFrame": "base",
+          "traceIndices": [0]
+        }, {
+          "name": "1965",
+          "data": [{
+            "y": [5, 3, 2],
+            "identifiers": ["China", "Pakistan", "Australia"],
+          }],
+          "layout": {
+            "xaxis": {"range": [7, 3]},
+            "yaxis": {"range": [0, 5]}
+          },
+          "baseFrame": "base",
+          "traceIndices": [0]
+        }
+      ]
+    }
+    
+    var gd = Plotly.d3.select('body').append('div').node();
+    
+    Plotly.plot(gd,x.data,x.layout);
+    
+    Plotly.addFrames(gd, x.frames);
+    
+    Plotly.animate(gd, "1965");
+  </script>
+</body>
+</html>
