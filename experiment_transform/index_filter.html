@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <script src = "../dist/plotly.js"></script>
+</head>
+
+<body>
+  <script>
+    var d3 = Plotly.d3;
+    var gd = d3.select('body').append('div').node();
+    
+    var data = [{
+      x: [20, 11, 12, 0, 1, 2, 3],
+      y: [1, 2, 3, 2, 5, 2, 0]
+    }];
+    
+    data.push(JSON.parse(JSON.stringify(data[0])));
+    
+    data[0].transforms = [{
+      type: 'filter',
+      operation: '<',
+      value: 10
+    }];
+    
+    Plotly.plot(gd, data);
+  </script>
+</body>
+</html>
