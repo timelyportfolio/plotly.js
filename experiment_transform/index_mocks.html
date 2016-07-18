@@ -8,6 +8,7 @@
 
 <body>
   <select id="mock-select" style="width:100px;"></select>
+  <select id="frame-select" style="width:100px;"></select>
   <div id="plotly-gd"></div>
   <script>
     var d3 = Plotly.d3;
@@ -23,19 +24,43 @@
     
     d3.select('#mock-select')
       .on('change',function(){
-        debugger;
         console.log(d3.event.target.value);
         draw_plotly(d3.event.target.value);
+      });
+      
+    d3.select('#frame-select')
+      .on('change',function(){
+        console.log(d3.event.target.value);
+        animate_plotly(d3.event.target.value);
       });
       
     function draw_plotly(mock){
       d3.json(
         '../test/image/mocks/' + mock,
         function(err,mock){
-          Plotly.newPlot('plotly-gd', mock.data, mock.layout, mock.config);
+          Plotly.newPlot('plotly-gd', mock.data, mock.layout, mock.config)
+            .then(function(gd){
+              if(mock.frames){
+                var options = d3.select('#frame-select').selectAll('option')
+                  .data(mock.frames.map(function(d){return d.name}))
+                options.enter()
+                  .append('option');
+                options.exit().remove();
+                options.text(function(d){return d});
+                
+                d3.select('#frame-select').style('display', null);
+                return Plotly.addFrames(gd, mock.frames);
+              } else {
+                d3.select('#frame-select').style('display', "none");
+              }
+            })
         }
       )
     }
+    
+    function animate_plotly(frame){
+      return Plotly.animate('plotly-gd',frame);
+    };
   </script>
 </body>
 

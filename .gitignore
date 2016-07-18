@@ -1,9 +1,9 @@
 node_modules
-
 build/*
-
 !build/plotcss.js
 !build/ploticon.js
 !build/README.md
-
 npm-debug.log*
+.Rhistory
+.Rproj.user
+plotly.js.Rproj
