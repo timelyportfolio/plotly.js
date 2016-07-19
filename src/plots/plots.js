@@ -674,47 +674,54 @@ function relinkPrivateKeys(toContainer, fromContainer) {
 
 plots.supplyDataDefaults = function(dataIn, dataOut, layout) {
     var modules = layout._modules = [],
-        basePlotModules = layout._basePlotModules = [];
-
-    var cnt = 0;
+        basePlotModules = layout._basePlotModules = [],
+        cnt = 0;
 
     function pushModule(fullTrace) {
+        dataOut.push(fullTrace);
+
         var _module = fullTrace._module;
         if(!_module) return;
 
         Lib.pushUnique(modules, _module);
         Lib.pushUnique(basePlotModules, fullTrace._module.basePlotModule);
+
+        cnt++;
     }
 
     for(var i = 0; i < dataIn.length; i++) {
-        var trace = dataIn[i];
-
-        var fullTrace = plots.supplyTraceDefaults(trace, cnt, layout);
-
-        // keep track of pre-transform _input
-        var traceIn = fullTrace._input;
+        var trace = dataIn[i],
+            fullTrace = plots.supplyTraceDefaults(trace, cnt, layout);
 
         if(fullTrace.transforms && fullTrace.transforms.length) {
             var expandedTraces = applyTransforms(fullTrace, dataOut, layout);
 
             for(var j = 0; j < expandedTraces.length; j++) {
-                var expandedTrace = expandedTraces[j];
-                var fullExpandedTrace = plots.supplyTraceDefaults(expandedTrace, cnt, layout);
+                var expandedTrace = expandedTraces[j],
+                    fullExpandedTrace = plots.supplyTraceDefaults(expandedTrace, cnt, layout);
 
-                // copy refs
-                fullExpandedTrace._input = traceIn;
-                fullExpandedTrace._fullTransforms = fullTrace.transforms;
-                fullExpandedTrace._index = i;
+                // mutate uid w.r.t to expanded index to promote consistency
+                // between update calls.
+                expandedTrace.uid = fullExpandedTrace.uid = fullTrace.uid + '-' + j;
 
-                dataOut.push(fullExpandedTrace);
+                // add info about parent data trace
+                fullExpandedTrace.index = i;
+                fullExpandedTrace._input = trace;
+                fullExpandedTrace._fullInput = fullTrace;
+
+                // add info about the expanded data
+                fullExpandedTrace._expandedIndex = cnt;
+                fullExpandedTrace._expandedInput = expandedTrace;
+
                 pushModule(fullExpandedTrace);
-                cnt++;
             }
         }
         else {
-            dataOut.push(fullTrace);
+            fullTrace.index = i;
+            fullTrace._input = trace;
+            fullTrace._expandedIndex = cnt;
+
             pushModule(fullTrace);
-            cnt++;
         }
     }
 };
@@ -734,8 +741,6 @@ plots.supplyTraceDefaults = function(traceIn, traceIndex, layout) {
             plots.subplotsRegistry[subplotType].attributes, subplotAttr);
     }
 
-    // module-independent attributes
-    traceOut.index = traceIndex;
     var visible = coerce('visible');
 
     coerce('type');
@@ -784,18 +789,13 @@ plots.supplyTraceDefaults = function(traceIn, traceIndex, layout) {
         supplyTransformDefaults(traceIn, traceOut, layout);
     }
 
-    // NOTE: I didn't include fit info at all... for now I think it can stay
-    // just in gd.data, as this info isn't involved in creating plots at all,
-    // only in pulling back up the fit popover
-
-    // reference back to the input object for convenience
-    traceOut._input = traceIn;
-
     return traceOut;
 };
 
 function supplyTransformDefaults(traceIn, traceOut, layout) {
-    var containerIn = traceIn.transforms || [],
+    if(!Array.isArray(traceIn.transforms)) return;
+
+    var containerIn = traceIn.transforms,
         containerOut = traceOut.transforms = [];
 
     for(var i = 0; i < containerIn.length; i++) {
