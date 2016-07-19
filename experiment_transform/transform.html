@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+
+<script src = "../dist/plotly.js"></script>
+</head>
+<body>
+
+<script>
+var d3 = Plotly.d3;
+var mockData0 = [{
+       mode: 'markers',
+       x: [1, -1, -2, 0, 1, 2, 3],
+       y: [1, 2, 3, 1, 2, 3, 1],
+       transforms: [{
+           type: 'groupby',
+           groups: ['a', 'a', 'b', 'a', 'b', 'b', 'a'],
+           groupColors: { a: 'red', b: 'blue' }
+       }, {
+           type: 'filter',
+           operation: '>'
+       }]
+   }];
+   
+var mockData1 = [{
+    x: [20, 11, 12, 0, 1, 2, 3],
+    y: [1, 2, 3, 2, 5, 2, 0],
+    transforms: [{
+        type: 'filter',
+        operation: '<',
+        value: 10
+    }]
+}]
+   
+var gd = d3.select('body').append('div');
+Plotly.plot(gd.node(), mockData0)
+
+var gd2 = d3.select('body').append('div');
+Plotly.plot(gd2.node(), mockData1)
+  
+</script>
+
+</body>
+</html>

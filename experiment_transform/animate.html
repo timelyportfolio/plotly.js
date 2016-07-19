@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+
+<script src = "../dist/plotly.js"></script>
+</head>
+<body>
+
+<script>
+var d3 = Plotly.d3;
+var basic_area = {
+        "data": [
+            {
+                    "x": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "y": [
+                        0,
+                        2,
+                        3,
+                        5
+                    ],
+                    "fill": "tozeroy",
+                    "type": "scatter"
+            },
+            {
+                    "x": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "y": [
+                        3,
+                        5,
+                        1,
+                        7
+                    ],
+                    "fill": "tonexty",
+                    "type": "scatter"
+            }
+        ]
+};
+
+
+var gd = d3.select('body').append('div').node();
+Plotly.plot(gd, basic_area.data, basic_area.layout).then(function() {
+    setTimeout(function(){Plotly.restyle(gd, {visible: [false]}, [1])},3000);
+});
+
+
+
+</script>
+
+</body>
+</html>
