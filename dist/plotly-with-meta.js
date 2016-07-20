@@ -55777,22 +55777,20 @@ module.exports = function plot(traces, plotinfo, transitionConfig) {
 
         if(!yObj.visible && !xObj.visible) return;
 
-
         var errorbars = d3.select(this).selectAll('g.errorbar')
-            .data(Lib.identity, keyFunc);
+            .data(d, keyFunc);
 
-        errorbars.enter().append('g')
+        errorbars.exit().remove();
+
+        errorbars.style('opacity', 1);
+
+        var enter = errorbars.enter().append('g')
             .classed('errorbar', true);
 
-        if(hasAnimation) {
-            errorbars.exit()
-                .style('opacity', 1)
-                .transition()
-                    .duration(transitionConfig.duration)
-                    .style('opacity', 0)
-                    .remove();
-        } else {
-            errorbars.exit().remove();
+        if (hasAnimation) {
+            enter.style('opacity', 0).transition()
+                .duration(transitionConfig.duration)
+                .style('opacity', 1);
         }
 
         errorbars.each(function(d) {
@@ -55822,24 +55820,15 @@ module.exports = function plot(traces, plotinfo, transitionConfig) {
                 if(isNew) {
                     yerror = errorbar.append('path')
                         .classed('yerror', true);
-
-                    if(hasAnimation) {
-                        yerror = yerror.style('opacity', 0);
-                    }
                 } else if(hasAnimation) {
-                    yerror = yerror.transition()
-                        .duration(transitionConfig.duration)
-                        .ease(transitionConfig.ease)
-                        .delay(transitionConfig.delay);
+                    yerror = yerror
+                        .transition()
+                            .duration(transitionConfig.duration)
+                            .ease(transitionConfig.ease)
+                            .delay(transitionConfig.delay);
                 }
 
                 yerror.attr('d', path);
-
-                if(isNew && hasAnimation) {
-                    yerror = yerror.transition()
-                        .duration(transitionConfig.duration)
-                        .style('opacity', 1);
-                }
             }
 
             if(xObj.visible && isNumeric(coords.x) &&
@@ -55860,24 +55849,15 @@ module.exports = function plot(traces, plotinfo, transitionConfig) {
                 if(isNew) {
                     xerror = errorbar.append('path')
                         .classed('xerror', true);
-
-                    if(hasAnimation) {
-                        xerror = xerror.style('opacity', 0);
-                    }
                 } else if(hasAnimation) {
-                    xerror = xerror.transition()
-                        .duration(transitionConfig.duration)
-                        .ease(transitionConfig.ease)
-                        .delay(transitionConfig.delay);
+                    xerror = xerror
+                        .transition()
+                            .duration(transitionConfig.duration)
+                            .ease(transitionConfig.ease)
+                            .delay(transitionConfig.delay);
                 }
 
                 xerror.attr('d', path);
-
-                if(isNew && hasAnimation) {
-                    xerror = xerror.transition()
-                        .duration(transitionConfig.duration)
-                        .style('opacity', 1);
-                }
             }
         });
 
@@ -67636,7 +67616,16 @@ Plotly.transition = function(gd, data, layout, traceIndices, transitionConfig) {
 
             transitionedTraces.push(traceIdx);
 
-            Lib.extendDeepNoArrays(gd.data[traceIndices[i]], data[i]);
+            // This is a multi-step process. First clone w/o arrays so that
+            // we're not modifying the original:
+            var update = Lib.extendDeepNoArrays({}, data[i]);
+
+            // Then expand object paths since we don't obey object-overwrite
+            // semantics here:
+            update = Lib.expandObjectPaths(update);
+
+            // Finally apply the update (without copying arrays, of course):
+            Lib.extendDeepNoArrays(gd.data[traceIndices[i]], update);
         }
 
         Plots.supplyDefaults(gd);
@@ -99950,11 +99939,11 @@ exports.name = 'filter';
 exports.attributes = {
     operation: {
         valType: 'enumerated',
-        values: ['=', '<', '>'],
+        values: ['=', '<', '>', 'within', 'notwithin', 'in', 'notin'],
         dflt: '='
     },
     value: {
-        valType: 'number',
+        valType: 'any',
         dflt: 0
     },
     filtersrc: {
@@ -100055,6 +100044,16 @@ function transformOne(trace, state) {
 
 function getFilterFunc(opts) {
     var value = opts.value;
+    // if value is not array then coerce to
+    //   an array of [value,value] so the
+    //   filter function will work
+    //   but perhaps should just error out
+    var value_arr = [];
+    if (!Array.isArray(value)) {
+        value_arr = [value, value];
+    } else {
+        value_arr = value;
+    }
 
     switch(opts.operation) {
         case '=':
@@ -100063,6 +100062,22 @@ function getFilterFunc(opts) {
             return function(v) { return v < value; };
         case '>':
             return function(v) { return v > value; };
+        case 'within':
+            return function(v) {
+                // keep the = ?
+                return v >= Math.min.apply( null, value ) &&
+                      v <= Math.max.apply( null, value );
+            };
+        case 'notwithin':
+            return function(v) {
+                // keep the = ?
+                return !(v >= Math.min.apply( null, value ) &&
+                      v <= Math.max.apply( null, value ));
+            };
+        case 'in':
+            return function(v) { return value.indexOf(v) >= 0 };
+        case 'notin':
+            return function(v) { return value.indexOf(v) === -1 };
     }
 }
 

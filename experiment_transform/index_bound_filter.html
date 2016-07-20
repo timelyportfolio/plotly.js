@@ -1,0 +1,48 @@
+<html>
+<head>
+  <meta charset='utf-8'/>
+  <script src = '../dist/plotly.js'></script>
+</head>
+
+<body>
+  <div id='plotly1' style='display:block;float:left;width:50%'></div>
+  <div id='plotly2' style='display:block;float:left;width:50%'></div>
+  <script>
+    var d3 = Plotly.d3;
+    
+    var data = [{
+      x: [20, 11, 12, 0, 1, 2, 3],
+      y: [1, 2, 3, 2, 5, 2, 0],
+      type: 'scatter',
+      mode: 'markers'
+    }];
+    
+    var data2 = JSON.parse(JSON.stringify(data));
+    
+    Plotly.plot('plotly1', data)
+      .then(function(gd){
+        gd.on('plotly_selected', function(sel){
+          var data_trans = JSON.parse(JSON.stringify(data));
+          data_trans[0].transforms = [{
+            type:'filter',
+            operation:'in',
+            value:sel.points.map(function(d){return d.x}),
+            filtersrc:'x'
+          }];
+          data_trans[0].transforms.push({
+            type:'filter',
+            operation:'in',
+            value:sel.points.map(function(d){return d.y}),
+            filtersrc:'y'
+          })
+          Plotly.newPlot(
+            'plotly2',
+            data_trans
+          );
+        });
+      });
+    Plotly.plot('plotly2', data);
+
+  </script>
+</body>
+</html>
