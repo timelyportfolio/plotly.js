@@ -23,18 +23,20 @@
       .then(function(gd){
         gd.on('plotly_selected', function(sel){
           var data_trans = JSON.parse(JSON.stringify(data));
-          data_trans[0].transforms = [{
-            type:'filter',
-            operation:'in',
-            value:sel.points.map(function(d){return d.x}),
-            filtersrc:'x'
-          }];
-          data_trans[0].transforms.push({
-            type:'filter',
-            operation:'in',
-            value:sel.points.map(function(d){return d.y}),
-            filtersrc:'y'
-          })
+          if(sel){
+            data_trans[0].transforms = [{
+              type:'filter',
+              operation:'in',
+              value:sel.points.map(function(d){return d.x}),
+              filtersrc:'x'
+            }];
+            data_trans[0].transforms.push({
+              type:'filter',
+              operation:'in',
+              value:sel.points.map(function(d){return d.y}),
+              filtersrc:'y'
+            })
+          }
           Plotly.newPlot(
             'plotly2',
             data_trans
