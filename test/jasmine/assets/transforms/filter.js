@@ -16,11 +16,11 @@ exports.name = 'filter';
 exports.attributes = {
     operation: {
         valType: 'enumerated',
-        values: ['=', '<', '>'],
+        values: ['=', '<', '>', 'within', 'notwithin', 'in', 'notin'],
         dflt: '='
     },
     value: {
-        valType: 'number',
+        valType: 'any',
         dflt: 0
     },
     filtersrc: {
@@ -121,6 +121,16 @@ function transformOne(trace, state) {
 
 function getFilterFunc(opts) {
     var value = opts.value;
+    // if value is not array then coerce to
+    //   an array of [value,value] so the
+    //   filter function will work
+    //   but perhaps should just error out
+    var value_arr = [];
+    if (!Array.isArray(value)) {
+        value_arr = [value, value];
+    } else {
+        value_arr = value;
+    }
 
     switch(opts.operation) {
         case '=':
@@ -129,6 +139,22 @@ function getFilterFunc(opts) {
             return function(v) { return v < value; };
         case '>':
             return function(v) { return v > value; };
+        case 'within':
+            return function(v) {
+                // keep the = ?
+                return v >= Math.min.apply( null, value ) &&
+                      v <= Math.max.apply( null, value );
+            };
+        case 'notwithin':
+            return function(v) {
+                // keep the = ?
+                return !(v >= Math.min.apply( null, value ) &&
+                      v <= Math.max.apply( null, value ));
+            };
+        case 'in':
+            return function(v) { return value.indexOf(v) >= 0 };
+        case 'notin':
+            return function(v) { return value.indexOf(v) === -1 };
     }
 }
 
