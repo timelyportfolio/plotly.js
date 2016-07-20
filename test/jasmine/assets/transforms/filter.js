@@ -16,7 +16,7 @@ exports.name = 'filter';
 exports.attributes = {
     operation: {
         valType: 'enumerated',
-        values: ['=', '<', '>', 'in', 'notin'],
+        values: ['=', '<', '>', 'within', 'notwithin', 'in', 'notin'],
         dflt: '='
     },
     value: {
@@ -121,6 +121,16 @@ function transformOne(trace, state) {
 
 function getFilterFunc(opts) {
     var value = opts.value;
+    // if value is not array then coerce to
+    //   an array of [value,value] so the
+    //   filter function will work
+    //   but perhaps should just error out
+    var value_arr = [];
+    if (!Array.isArray(value)) {
+        value_arr = [value, value];
+    } else {
+        value_arr = value;
+    }
 
     switch(opts.operation) {
         case '=':
@@ -129,32 +139,22 @@ function getFilterFunc(opts) {
             return function(v) { return v < value; };
         case '>':
             return function(v) { return v > value; };
+        case 'within':
+            return function(v) {
+                // keep the = ?
+                return v >= Math.min.apply( null, value ) &&
+                      v <= Math.max.apply( null, value );
+            };
+        case 'notwithin':
+            return function(v) {
+                // keep the = ?
+                return !(v >= Math.min.apply( null, value ) &&
+                      v <= Math.max.apply( null, value ));
+            };
         case 'in':
-            return function(v) {
-                // if value is not array then coerce to
-                //   an array of [value,value] so the
-                //   filter function will work
-                //   but perhaps should just error out
-                if (!Array.isArray(value)) { value = [value, value] }
-                return (
-                    typeof(v) === 'string' && value.indexOf(v) >= 0
-                ) || (
-                    typeof(v) !== 'string' && v >= value[0] && v <= value[1]
-                );
-            };
+            return function(v) { return value.indexOf(v) >= 0 };
         case 'notin':
-            return function(v) {
-                // if value is not array then coerce to
-                //   an array of [value,value] so the
-                //   filter function will work
-                //   but perhaps should just error out
-                if (!Array.isArray(value)) { value = [value, value] }
-                return (
-                    typeof(v) === 'string' && value.indexOf(v) === 0
-                ) || (
-                    typeof(v) !== 'string' && v < value[0] || v > value[1]
-                );
-            };
+            return function(v) { return value.indexOf(v) === -1 };
     }
 }
 

@@ -138,13 +138,13 @@ describe('one-to-one transforms:', function() {
         expect(dataOut[0].y).toEqual([2, 3]);
     });
 
-    it('filters should handle range numeric values with in and notin', function() {
+    it('filters should handle range numeric values within and notwithin', function() {
         var dataIn = [{
             x: [-2, -1, -2, 0, 1, 2, 3],
             y: [1, 2, 3, 1, 2, 3, 1],
             transforms: [{
                 type: 'filter',
-                operation: 'in',
+                operation: 'within',
                 value: [-1, 1],
                 filtersrc: 'x'
             }]
@@ -160,7 +160,7 @@ describe('one-to-one transforms:', function() {
         expect(dataIn[0].y).toEqual([1, 2, 3, 1, 2, 3, 1]);
         expect(dataIn[0].transforms).toEqual([{
             type: 'filter',
-            operation: 'in',
+            operation: 'within',
             value: [-1, 1],
             filtersrc: 'x'
         }]);
@@ -170,7 +170,48 @@ describe('one-to-one transforms:', function() {
         expect(dataOut[0].y).toEqual([2, 1, 2]);
     });
     
-    it('filters should handle range string values with in and notin', function() {
+    it('filters should handle numeric values in', function() {
+        var dataIn = [{
+            x: [-2, -1, -2, 0, 1, 2, 3],
+            y: [1, 2, 3, 1, 2, 3, 1],
+            transforms: [{
+                type: 'filter',
+                operation: 'in',
+                value: [-2, 0],
+                filtersrc: 'x'
+            }]
+        }];
+
+        var dataOut = [];
+        Plots.supplyDataDefaults(dataIn, dataOut, {}, []);
+
+        // applies transform
+        expect(dataOut[0].x).toEqual([-2, -2, 0]);
+        expect(dataOut[0].y).toEqual([1, 3, 1]);
+    });
+    
+        it('filters should handle numeric values in', function() {
+        var dataIn = [{
+            x: [-2, -1, -2, 0, 1, 2, 3],
+            y: [1, 2, 3, 1, 2, 3, 1],
+            transforms: [{
+                type: 'filter',
+                operation: 'notin',
+                value: [-2, 0],
+                filtersrc: 'x'
+            }]
+        }];
+
+        var dataOut = [];
+        Plots.supplyDataDefaults(dataIn, dataOut, {}, []);
+
+        // applies transform
+        expect(dataOut[0].x).toEqual([-1, 1, 2, 3]);
+        expect(dataOut[0].y).toEqual([2, 2, 3, 1]);
+    });
+
+  
+    it('filters should handle strings with in', function() {
         var dataIn = [{
             x: ['y', 't', 'b', 'm', 'p', 'l', 'o'],
             y: [1, 2, 3, 1, 5, 10, 20],
@@ -190,6 +231,28 @@ describe('one-to-one transforms:', function() {
         expect(dataOut[0].x).toEqual(['p', 'l', 'o']);
         expect(dataOut[0].y).toEqual([5, 10, 20]);
     });
+    
+        it('filters should handle strings with in', function() {
+        var dataIn = [{
+            x: ['y', 't', 'b', 'm', 'p', 'l', 'o'],
+            y: [1, 2, 3, 1, 5, 10, 20],
+            transforms: [{
+                type: 'filter',
+                operation: 'notin',
+                value: ['p', 'l', 'o'],
+                filtersrc: 'x'
+            }]
+        }];
+        
+        
+        var dataOut = [];
+        Plots.supplyDataDefaults(dataIn, dataOut, {}, []);
+        
+        // applies transform
+        expect(dataOut[0].x).toEqual(['y', 't', 'b', 'm']);
+        expect(dataOut[0].y).toEqual([1, 2, 3, 1]);
+    });
+
 
     it('Plotly.plot should plot the transform trace', function(done) {
         var data = Lib.extendDeep([], mockData0);
