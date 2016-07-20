@@ -16,11 +16,11 @@ exports.name = 'filter';
 exports.attributes = {
     operation: {
         valType: 'enumerated',
-        values: ['=', '<', '>'],
+        values: ['=', '<', '>', 'in', 'notin'],
         dflt: '='
     },
     value: {
-        valType: 'number',
+        valType: 'any',
         dflt: 0
     },
     filtersrc: {
@@ -129,6 +129,32 @@ function getFilterFunc(opts) {
             return function(v) { return v < value; };
         case '>':
             return function(v) { return v > value; };
+        case 'in':
+            return function(v) {
+                // if value is not array then coerce to
+                //   an array of [value,value] so the
+                //   filter function will work
+                //   but perhaps should just error out
+                if (!Array.isArray(value)) { value = [value, value] }
+                return (
+                    typeof(v) === 'string' && value.indexOf(v) >= 0
+                ) || (
+                    typeof(v) !== 'string' && v >= value[0] && v <= value[1]
+                );
+            };
+        case 'notin':
+            return function(v) {
+                // if value is not array then coerce to
+                //   an array of [value,value] so the
+                //   filter function will work
+                //   but perhaps should just error out
+                if (!Array.isArray(value)) { value = [value, value] }
+                return (
+                    typeof(v) === 'string' && value.indexOf(v) === 0
+                ) || (
+                    typeof(v) !== 'string' && v < value[0] || v > value[1]
+                );
+            };
     }
 }
 
