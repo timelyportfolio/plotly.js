@@ -5,6 +5,7 @@
 </head>
 
 <body>
+  <h2>select in right plot to filter left plot</h2>
   <div id='plotly1' style='display:block;float:left;width:50%'></div>
   <div id='plotly2' style='display:block;float:left;width:50%'></div>
   <script>
@@ -37,13 +38,37 @@
               filtersrc:'y'
             })
           }
-          Plotly.newPlot(
-            'plotly2',
-            data_trans
+          
+          gd2 = document.getElementById('plotly2');
+          
+          /*  animate would be perfect here but getting error
+          var frame = {
+              "name": "frame" + gd2._frameData._frames.length,
+              "data": data_trans,
+              "baseFrame": "base",
+              "traceIndices": [0],
+              "layout": { }
+          };
+          
+          Plotly.addFrames(gd2, [frame]).then(
+            function(gd2){
+              return Plotly.animate(gd2, "frame" + gd2._frameData._frames.length)  
+            }
           );
+          
+          */
+          
+          Plotly.newPlot(gd2, data_trans);
         });
       });
-    Plotly.plot('plotly2', data);
+      
+    Plotly.plot('plotly2', data)
+      .then(function(gd){
+        return Plotly.addFrames(gd,[{
+          'name': 'base',
+          'data': data
+        }]);
+      });
 
   </script>
 </body>
